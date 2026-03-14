@@ -1,0 +1,10 @@
+{
+  "buildCommand": "echo 'Frontend only'",
+  "outputDirectory": "frontend",
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "frontend/$1"
+    }
+  ]
+}

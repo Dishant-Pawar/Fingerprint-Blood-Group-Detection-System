@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Fingerprint - Blood Group System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <script src="js/config.js"></script>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <h2>🔐 Fingerprint Blood Group System</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="register.html">Register</a></li>
+                <li><a href="verify.html" class="active">Verify</a></li>
+                <li><a href="manage.html">Manage</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <section class="main-content">
+        <div class="container">
+            <div class="form-container">
+                <h1>🔍 Verify Fingerprint</h1>
+                <p class="subtitle">Upload your fingerprint to retrieve your blood group information</p>
+
+                <!-- Verification Form -->
+                <form id="verifyForm" class="form">
+                    <!-- Fingerprint Upload Field -->
+                    <div class="form-group">
+                        <label for="fingerprint_verify">Fingerprint Image *</label>
+                        <div class="file-upload">
+                            <input
+                                type="file"
+                                id="fingerprint_verify"
+                                name="fingerprint_verify"
+                                accept="image/*"
+                                required
+                            />
+                            <span class="file-label">Click to upload or drag fingerprint image</span>
+                        </div>
+                        <small class="error-message" id="fingerprintVerifyError"></small>
+                    </div>
+
+                    <!-- Image Preview -->
+                    <div class="form-group">
+                        <div id="imagePreviewVerify" class="image-preview hidden">
+                            <img id="previewImageVerify" src="" alt="Preview">
+                            <button type="button" class="btn-remove" id="removeImageVerify">✕</button>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary btn-block">Verify Fingerprint</button>
+                </form>
+
+                <!-- Success Result -->
+                <div id="successResult" class="result-card success hidden">
+                    <div class="result-header">
+                        <span class="result-icon">✅</span>
+                        <h2>Fingerprint Verified!</h2>
+                    </div>
+                    <div class="result-content">
+                        <div class="result-row">
+                            <span class="result-label">Name:</span>
+                            <span class="result-value" id="resultName"></span>
+                        </div>
+                        <div class="result-row blood-group-highlight">
+                            <span class="result-label">Blood Group:</span>
+                            <span class="result-value" id="resultBloodGroup"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error Result -->
+                <div id="errorResult" class="result-card error hidden">
+                    <div class="result-header">
+                        <span class="result-icon">❌</span>
+                        <h2>Verification Failed</h2>
+                    </div>
+                    <div class="result-content">
+                        <p id="errorResultMessage"></p>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loadingResult" class="result-card loading hidden">
+                    <div class="spinner"></div>
+                    <p>Verifying fingerprint...</p>
+                </div>
+
+                <!-- Clear Results Button -->
+                <div id="clearResultsContainer" class="hidden" style="margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary btn-block" id="clearResults">
+                        Clear Results
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Fingerprint Blood Group Detection System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        // Get form elements
+        const verifyForm = document.getElementById('verifyForm');
+        const fingerprintVerifyInput = document.getElementById('fingerprint_verify');
+        const imagePreviewVerify = document.getElementById('imagePreviewVerify');
+        const previewImageVerify = document.getElementById('previewImageVerify');
+        const removeImageVerifyBtn = document.getElementById('removeImageVerify');
+        const successResult = document.getElementById('successResult');
+        const errorResult = document.getElementById('errorResult');
+        const loadingResult = document.getElementById('loadingResult');
+        const clearResultsContainer = document.getElementById('clearResultsContainer');
+        const clearResultsBtn = document.getElementById('clearResults');
+
+        // Handle image preview
+        fingerprintVerifyInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    previewImageVerify.src = event.target.result;
+                    imagePreviewVerify.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Remove image
+        removeImageVerifyBtn.addEventListener('click', function() {
+            fingerprintVerifyInput.value = '';
+            imagePreviewVerify.classList.add('hidden');
+            previewImageVerify.src = '';
+        });
+
+        // Handle form submission
+        verifyForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Clear previous results
+            hideResults();
+
+            // Get form values
+            const fingerprintFile = fingerprintVerifyInput.files[0];
+
+            // Validate input
+            if (!fingerprintFile) {
+                showErrorResult('Please upload a fingerprint image');
+                return;
+            }
+
+            // Create FormData
+            const formData = new FormData();
+            formData.append('fingerprint_image', fingerprintFile);
+
+            // Disable submit button and show loading
+            const submitBtn = verifyForm.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            loadingResult.classList.remove('hidden');
+
+            // Send request
+            fetch(`${API_BASE_URL}/api/verify`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('resultName').textContent = data.name;
+                    document.getElementById('resultBloodGroup').textContent = data.blood_group;
+                    showSuccessResult();
+                } else {
+                    showErrorResult(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showErrorResult('Failed to verify! Make sure the backend API is running.');
+            })
+            .finally(() => {
+                loadingResult.classList.add('hidden');
+                submitBtn.disabled = false;
+            });
+        });
+
+        // Show success result
+        function showSuccessResult() {
+            successResult.classList.remove('hidden');
+            clearResultsContainer.classList.remove('hidden');
+        }
+
+        // Show error result
+        function showErrorResult(message) {
+            document.getElementById('errorResultMessage').textContent = message;
+            errorResult.classList.remove('hidden');
+            clearResultsContainer.classList.remove('hidden');
+        }
+
+        // Hide all results
+        function hideResults() {
+            successResult.classList.add('hidden');
+            errorResult.classList.add('hidden');
+            loadingResult.classList.add('hidden');
+            clearResultsContainer.classList.add('hidden');
+        }
+
+        // Clear results
+        clearResultsBtn.addEventListener('click', function() {
+            hideResults();
+            verifyForm.reset();
+            imagePreviewVerify.classList.add('hidden');
+            previewImageVerify.src = '';
+        });
+    </script>
+</body>
+</html>

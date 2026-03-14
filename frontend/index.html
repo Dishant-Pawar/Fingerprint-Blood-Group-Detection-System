@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Group Detection - Fingerprint System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <h2>🔐 Fingerprint Blood Group System</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="register.html">Register</a></li>
+                <li><a href="verify.html">Verify</a></li>
+                <li><a href="manage.html">Manage</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Fingerprint Blood Group Detection System</h1>
+                <p>Register your fingerprint and retrieve your blood group information instantly</p>
+                <div class="cta-buttons">
+                    <a href="register.html" class="btn btn-primary">📝 Register Fingerprint</a>
+                    <a href="verify.html" class="btn btn-secondary">🔍 Verify Fingerprint</a>
+                    <a href="manage.html" class="btn btn-secondary">📋 Manage Registered</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2>Key Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">👤</div>
+                    <h3>Easy Registration</h3>
+                    <p>Register your fingerprint with your blood group in just a few clicks</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Secure Storage</h3>
+                    <p>Your fingerprint data is securely hashed and stored in a database</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Quick Verification</h3>
+                    <p>Verify your fingerprint and instantly retrieve your blood group</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2>How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Register</h3>
+                    <p>Upload your fingerprint image and enter your blood group</p>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Process</h3>
+                    <p>Fingerprint is converted to a secure hash</p>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Store</h3>
+                    <p>Data is stored securely in the database</p>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Verify</h3>
+                    <p>Upload fingerprint to retrieve blood group instantly</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- API Status Section -->
+    <section class="api-status">
+        <div class="container">
+            <h2>API Status</h2>
+            <div class="status-box">
+                <p id="api-status">Checking API connection...</p>
+                <div id="status-detail"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Fingerprint Blood Group Detection System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        // Check API status on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAPIStatus();
+        });
+
+        function checkAPIStatus() {
+            fetch('http://localhost:5000/')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('api-status').textContent = '✅ API is running!';
+                    document.getElementById('status-detail').textContent = data.message;
+                })
+                .catch(error => {
+                    document.getElementById('api-status').textContent = '❌ API is not running!';
+                    document.getElementById('status-detail').textContent = 'Make sure the Flask backend is running on http://localhost:5000';
+                });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Fingerprint - Blood Group System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <script src="js/config.js"></script>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <h2>🔐 Fingerprint Blood Group System</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="register.html" class="active">Register</a></li>
+                <li><a href="verify.html">Verify</a></li>
+                <li><a href="manage.html">Manage</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <section class="main-content">
+        <div class="container">
+            <div class="form-container">
+                <h1>📝 Register Fingerprint</h1>
+                <p class="subtitle">Register your fingerprint with your blood group information</p>
+
+                <!-- Registration Form -->
+                <form id="registerForm" class="form">
+                    <!-- Name Field -->
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            placeholder="Enter your full name"
+                            required
+                        />
+                        <small class="error-message" id="nameError"></small>
+                    </div>
+
+                    <!-- Blood Group Field -->
+                    <div class="form-group">
+                        <label for="blood_group">Blood Group *</label>
+                        <select id="blood_group" name="blood_group" required>
+                            <option value="">-- Select Blood Group --</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                        </select>
+                        <small class="error-message" id="bloodGroupError"></small>
+                    </div>
+
+                    <!-- Fingerprint Upload Field -->
+                    <div class="form-group">
+                        <label for="fingerprint_image">Fingerprint Image *</label>
+                        <div class="file-upload">
+                            <input
+                                type="file"
+                                id="fingerprint_image"
+                                name="fingerprint_image"
+                                accept="image/*"
+                                required
+                            />
+                            <span class="file-label">Click to upload or drag fingerprint image</span>
+                        </div>
+                        <small class="error-message" id="fingerprintError"></small>
+                    </div>
+
+                    <!-- Image Preview -->
+                    <div class="form-group">
+                        <div id="imagePreview" class="image-preview hidden">
+                            <img id="previewImage" src="" alt="Preview">
+                            <button type="button" class="btn-remove" id="removeImage">✕</button>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary btn-block">Register</button>
+                </form>
+
+                <!-- Messages -->
+                <div id="successMessage" class="message success hidden">
+                    <span class="message-icon">✅</span>
+                    <span id="successText"></span>
+                </div>
+
+                <div id="errorMessage" class="message error hidden">
+                    <span class="message-icon">❌</span>
+                    <span id="errorText"></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Fingerprint Blood Group Detection System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        // Get form elements
+        const registerForm = document.getElementById('registerForm');
+        const fingerprintInput = document.getElementById('fingerprint_image');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImage = document.getElementById('previewImage');
+        const removeImageBtn = document.getElementById('removeImage');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const successText = document.getElementById('successText');
+        const errorText = document.getElementById('errorText');
+
+        // Handle image preview
+        fingerprintInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    previewImage.src = event.target.result;
+                    imagePreview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Remove image
+        removeImageBtn.addEventListener('click', function() {
+            fingerprintInput.value = '';
+            imagePreview.classList.add('hidden');
+            previewImage.src = '';
+        });
+
+        // Handle form submission
+        registerForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Clear messages
+            hideMessages();
+
+            // Get form values
+            const name = document.getElementById('name').value.trim();
+            const bloodGroup = document.getElementById('blood_group').value;
+            const fingerprintFile = fingerprintInput.files[0];
+
+            // Validate inputs
+            if (!name) {
+                showError('Please enter your full name');
+                return;
+            }
+
+            if (!bloodGroup) {
+                showError('Please select your blood group');
+                return;
+            }
+
+            if (!fingerprintFile) {
+                showError('Please upload a fingerprint image');
+                return;
+            }
+
+            // Create FormData
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('blood_group', bloodGroup);
+            formData.append('fingerprint_image', fingerprintFile);
+
+            // Disable submit button
+            const submitBtn = registerForm.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Registering...';
+
+            // Send request
+            fetch(`${API_BASE_URL}/api/register`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showSuccess(data.message);
+                    registerForm.reset();
+                    imagePreview.classList.add('hidden');
+                } else {
+                    showError(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Failed to register! Make sure the backend API is running.');
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Register';
+            });
+        });
+
+        // Show success message
+        function showSuccess(message) {
+            successText.textContent = message;
+            successMessage.classList.remove('hidden');
+        }
+
+        // Show error message
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.classList.remove('hidden');
+        }
+
+        // Hide messages
+        function hideMessages() {
+            successMessage.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
