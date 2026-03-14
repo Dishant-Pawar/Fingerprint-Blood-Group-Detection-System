@@ -1,1 +1,1 @@
-web: bash run.sh
+web: python3 backend/app.py

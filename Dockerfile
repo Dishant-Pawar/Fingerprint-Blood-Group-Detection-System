@@ -28,6 +28,5 @@ ENV FLASK_APP=backend/app.py
 ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
 
-# Run the application from backend directory
-WORKDIR /app/backend
-CMD ["python3", "app.py"]
+# Run the application
+CMD ["python3", "backend/app.py"]
