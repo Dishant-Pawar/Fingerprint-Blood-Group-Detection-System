@@ -1,0 +1,8 @@
+[build]
+builder = "dockerfile"
+
+[build.config]
+buildarmCompatible = true
+
+[deploy]
+startCommand = "python3 backend/app.py"

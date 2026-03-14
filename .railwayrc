@@ -1,0 +1,4 @@
+{
+  "builder": "dockerfile",
+  "startCommand": "python3 backend/app.py"
+}
